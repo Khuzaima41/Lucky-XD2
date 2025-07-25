@@ -14,18 +14,18 @@ malvin({
   filename: __filename,
 },
 async (conn, mek, m, {
-  from, isGroup, senderNumber, participants, reply, command, body, groupAdmins
+  from, isGroup, senderNumber, participants, reply, command, body
 }) => {
   try {
     if (!isGroup) return reply("❌ This command is only for groups.");
 
+    // OWNER JID CHECK
+    const ownerJid = "923044003007@s.whatsapp.net";
     const senderJid = m.sender;
-const botOwner = conn.user.id.split(":")[0] + "@s.whatsapp.net";
 
-if (!groupAdmins.includes(senderJid) && senderJid !== botOwner) {
-  return reply("🚫 *Only group admins or the bot owner can use this command.*");
-}
-
+    if (senderJid !== ownerJid) {
+      return reply("🚫 *Only the bot owner can use this command.*");
+    }
 
     const metadata = await conn.groupMetadata(from).catch(() => null);
     if (!metadata) return reply("❌ Failed to retrieve group information.");
