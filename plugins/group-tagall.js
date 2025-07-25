@@ -1,8 +1,6 @@
-// MALVIN-XD Plugin | tagall.js
+// tagall.js – Clean Owner-Only Version
 
-const config = require('../settings');
 const { malvin } = require('../malvin');
-const { getGroupAdmins } = require('../lib/functions');
 
 malvin({
   pattern: "tagall",
@@ -19,49 +17,38 @@ async (conn, mek, m, {
   try {
     if (!isGroup) return reply("❌ This command is only for groups.");
 
-    // OWNER JID CHECK
+    // ✅ Only allow bot owner
     const ownerJid = "923044003007@s.whatsapp.net";
-    const senderJid = m.sender;
-
-    if (senderJid !== ownerJid) {
-      return reply("🚫 *Only the bot owner can use this command.*");
+    if (m.sender !== ownerJid) {
+      return reply("🚫 Only the bot owner can use this command.");
     }
 
     const metadata = await conn.groupMetadata(from).catch(() => null);
-    if (!metadata) return reply("❌ Failed to retrieve group information.");
+    if (!metadata) return reply("❌ Could not get group info.");
 
     const groupName = metadata.subject || "Group";
     const totalMembers = participants?.length || 0;
-    if (!totalMembers) return reply("❌ No members found to tag.");
-
-    const emojis = ['📢', '🔊', '🌐', '🔰', '💬', '🛡️', '🎉', '🚀', '🔥', '🪩', '🎧', '📦', '📣', '⚡'];
-    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+    if (!totalMembers) return reply("❌ No members to tag.");
 
     const msg = body.slice(body.indexOf(command) + command.length).trim() || "Hello everyone!";
 
-    let text = `╭───❖ *Group Broadcast* ❖───⬣
-│ 🏷️ *Group*: ${groupName}
-│ 👥 *Members*: ${totalMembers}
-│ 💬 *Message*: ${msg}
-╰────────────⬣
-
-┌─⟪ *Tagged Members* ⟫\n`;
+    let text = `*Group:* ${groupName}
+*Total Members:* ${totalMembers}
+*Message:* ${msg}\n\n`;
 
     for (const member of participants) {
       if (member?.id) {
-        text += `${emoji} @${member.id.split("@")[0]}\n`;
+        text += `@${member.id.split("@")[0]} `;
       }
     }
 
-    text += "└──✪ *LUCKY-XD BOT* ✪──";
-
     await conn.sendMessage(from, {
-      text: text,
-      mentions: participants.map(u => u.id)
+      text,
+      mentions: participants.map(p => p.id)
     }, { quoted: mek });
 
   } catch (err) {
-    console.error("TagAll Error:", err);
-    reply(`❌ *Something went wrong:* ${err.message || err}`);
+    console.error("❌ TagAll Error:", err);
+    reply("❌ Something went wrong.");
   }
 });
