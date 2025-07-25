@@ -33,7 +33,7 @@ malvin({
             }).join("");
 
         const msg = `
-╭──❖ 「 *${toTinyCap("lucky xd status")}* 」 ❖─
+╭──❖ 「 *${toTinyCap("Khuzaima status")}* 」 ❖─
 │
 │ 👤 ʜɪ: *${pushname}*
 │ 🕓 ᴛɪᴍᴇ: *${currentTime}*
@@ -44,7 +44,7 @@ malvin({
 │
 ╰─────────❖
 
-✅ *Lucky is alive & operational!*
+✅ *KB is alive & operational!*
 🚀 *System: Stable & running smooth!*
 ✨ *Thank you for checking in!*
         `.trim();
@@ -53,14 +53,7 @@ malvin({
             image: { url: ALIVE_IMG },
             caption: msg,
             contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363420656466131@newsletter',
-                    newsletterName: 'LUCKY XD',
-                    serverMessageId: 143
-                }
+                mentionedJid: [m.sender] // Clean context, no channel
             }
         }, { quoted: mek });
 
