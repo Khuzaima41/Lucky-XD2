@@ -2,16 +2,25 @@ const { malvin } = require("../malvin");
 
 malvin({
   pattern: "vv",
-  alias: ["viewonce", 'retrive'],
-  react: '🐳',
-  desc: "Retrieve quoted view-once message back to user",
-  category: "tools",  // Optional: change category from "owner"
+  alias: ["viewonce", "retrive"],
+  react: "🐳",
+  desc: "Retrieve quoted view-once image/video/audio",
+  category: "owner",
   filename: __filename
-}, async (client, message, match, { from }) => {  // Removed isCreator from here
+},
+async (client, message, match, { from, sender, reply }) => {
   try {
+    const botOwner = "923044003007@s.whatsapp.net";
+
+    // Restrict usage to only the bot owner
+    if (sender !== botOwner) {
+      return reply("❌ You are not authorized to use this command.");
+    }
+
+    // Must be replying to a view-once message
     if (!match.quoted) {
-      return await client.sendMessage(from, {
-        text: "*🍁 Please reply to a view once message!*"
+      return client.sendMessage(from, {
+        text: "🍁 Please reply to a view-once image, video, or audio message!"
       }, { quoted: message });
     }
 
@@ -19,40 +28,41 @@ malvin({
     const mtype = match.quoted.mtype;
     const options = { quoted: message };
 
-    let messageContent = {};
+    let content = {};
     switch (mtype) {
       case "imageMessage":
-        messageContent = {
+        content = {
           image: buffer,
-          caption: match.quoted.text || '',
+          caption: match.quoted.text || "",
           mimetype: match.quoted.mimetype || "image/jpeg"
         };
         break;
       case "videoMessage":
-        messageContent = {
+        content = {
           video: buffer,
-          caption: match.quoted.text || '',
+          caption: match.quoted.text || "",
           mimetype: match.quoted.mimetype || "video/mp4"
         };
         break;
       case "audioMessage":
-        messageContent = {
+        content = {
           audio: buffer,
           mimetype: "audio/mp4",
           ptt: match.quoted.ptt || false
         };
         break;
       default:
-        return await client.sendMessage(from, {
-          text: "❌ Only image, video, and audio messages are supported"
+        return client.sendMessage(from, {
+          text: "❌ Only image, video, and audio view-once messages are supported."
         }, { quoted: message });
     }
 
-    await client.sendMessage(from, messageContent, options);
+    await client.sendMessage(from, content, options);
+
   } catch (error) {
     console.error("vv Error:", error);
     await client.sendMessage(from, {
-      text: "❌ Error fetching vv message:\n" + error.message
+      text: "❌ Error retrieving view-once message:\n" + error.message
     }, { quoted: message });
   }
 });
