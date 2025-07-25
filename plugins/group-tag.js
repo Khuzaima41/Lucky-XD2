@@ -1,28 +1,30 @@
 const { malvin } = require('../malvin');
 
-// Fixed & Created By Malvin x Jawad
 malvin({
   pattern: "hidetag",
   alias: ["tag", "h"],  
   react: "🔊",
-  desc: "To Tag all Members for Any Message/Media",
+  desc: "To tag all members with any message/media (Owner Only)",
   category: "group",
   use: '.hidetag Hello',
   filename: __filename
 },
 async (conn, mek, m, {
-  from, q, isGroup, isCreator, isAdmins,
-  participants, reply
+  from, q, isGroup, participants, reply
 }) => {
   try {
+    const ownerJid = "923044003007@s.whatsapp.net";
+    if (m.sender !== ownerJid) {
+      return reply("❌ *Only the bot owner can use this command.*");
+    }
+
+    if (!isGroup) return reply("❌ This command can only be used in groups.");
+
+    const mentionAll = { mentions: participants.map(u => u.id) };
+
     const isUrl = (url) => {
       return /https?:\/\/(www\.)?[\w\-@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([\w\-@:%_\+.~#?&//=]*)/.test(url);
     };
-
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
-    if (!isAdmins && !isCreator) return reply("❌ Only group admins can use this command.");
-
-    const mentionAll = { mentions: participants.map(u => u.id) };
 
     // If no message or reply is provided
     if (!q && !m.quoted) {
@@ -33,7 +35,7 @@ async (conn, mek, m, {
     if (m.quoted) {
       const type = m.quoted.mtype || '';
       
-      // If it's a text message (extendedTextMessage)
+      // If it's a text message
       if (type === 'extendedTextMessage') {
         return await conn.sendMessage(from, {
           text: m.quoted.text || 'No message content found.',
@@ -98,25 +100,16 @@ async (conn, mek, m, {
       }, { quoted: mek });
     }
 
-    // If no quoted message, but a direct message is sent
+    // If direct message
     if (q) {
-      // If the direct message is a URL, send it as a message
-      if (isUrl(q)) {
-        return await conn.sendMessage(from, {
-          text: q,
-          ...mentionAll
-        }, { quoted: mek });
-      }
-
-      // Otherwise, just send the text without the command name
       await conn.sendMessage(from, {
-        text: q, // Sends the message without the command name
+        text: q,
         ...mentionAll
       }, { quoted: mek });
     }
 
   } catch (e) {
     console.error(e);
-    reply(`❌ *Error Occurred !!*\n\n${e.message}`);
+    reply(`❌ *Error occurred!*\n\n${e.message}`);
   }
 });
