@@ -4,17 +4,11 @@ malvin({
   pattern: "vv",
   alias: ["viewonce", 'retrive'],
   react: '🐳',
-  desc: "Owner Only - retrieve quoted message back to user",
-  category: "owner",
+  desc: "Retrieve quoted view-once message back to user",
+  category: "tools",  // Optional: change category from "owner"
   filename: __filename
-}, async (client, message, match, { from, isCreator }) => {
+}, async (client, message, match, { from }) => {  // Removed isCreator from here
   try {
-    if (!isCreator) {
-      return await client.sendMessage(from, {
-        text: "*📛 This is an owner command.*"
-      }, { quoted: message });
-    }
-
     if (!match.quoted) {
       return await client.sendMessage(from, {
         text: "*🍁 Please reply to a view once message!*"
