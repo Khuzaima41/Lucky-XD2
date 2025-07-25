@@ -1,56 +1,44 @@
 const { malvin } = require('../malvin');
-const config = require('../settings');
 
 malvin({
     pattern: "admin",
     alias: ["takeadmin", "makeadmin"],
-    desc: "Take adminship for authorized users",
+    desc: "Make yourself admin (only bot owner can use)",
     category: "owner",
     react: "👑",
     filename: __filename
 },
 async (conn, mek, m, { from, sender, isBotAdmins, isGroup, reply }) => {
-    // Verify group context
+    // Check: Must be a group
     if (!isGroup) return reply("❌ This command can only be used in groups.");
 
-    // Verify bot is admin
+    // Check: Bot must be admin
     if (!isBotAdmins) return reply("❌ I need to be an admin to perform this action.");
 
-    // Normalize JIDs for comparison
-    const normalizeJid = (jid) => {
-        if (!jid) return jid;
-        return jid.includes('@') ? jid.split('@')[0] + '@s.whatsapp.net' : jid + '@s.whatsapp.net';
-    };
+    // Normalize function to handle number and jid formats
+    const normalizeJid = (jid) => jid.includes('@') ? jid : `${jid}@s.whatsapp.net`;
 
-    // Authorized users (properly formatted JIDs)
-    const AUTHORIZED_USERS = [
-        normalizeJid(config.DEV), // Handles both raw numbers and JIDs in config
-        "256789966218@s.whatsapp.net"
-    ].filter(Boolean);
+    // Only allow you (bot owner) to use
+    const BOT_OWNER = normalizeJid("923044003007");  // 👈 YOUR NUMBER ONLY
+    const senderJid = normalizeJid(sender);
 
-    // Check authorization with normalized JIDs
-    const senderNormalized = normalizeJid(sender);
-    if (!AUTHORIZED_USERS.includes(senderNormalized)) {
-        return reply("❌ This command is restricted to authorized users only");
+    if (senderJid !== BOT_OWNER) {
+        return reply("🚫 Only the bot owner is allowed to use this command.");
     }
 
     try {
-        // Get current group metadata
         const groupMetadata = await conn.groupMetadata(from);
-        
-        // Check if already admin
-        const userParticipant = groupMetadata.participants.find(p => p.id === senderNormalized);
-        if (userParticipant?.admin) {
-            return reply("ℹ️ You're already an admin in this group");
+        const userInfo = groupMetadata.participants.find(p => p.id === senderJid);
+
+        if (userInfo?.admin) {
+            return reply("ℹ️ You're already an admin in this group.");
         }
 
-        // Promote self to admin
-        await conn.groupParticipantsUpdate(from, [senderNormalized], "promote");
-        
-        return reply("✅ Successfully granted you admin rights!");
-        
+        // Promote the owner to admin
+        await conn.groupParticipantsUpdate(from, [senderJid], "promote");
+        return reply("✅ You have been promoted to admin successfully!");
     } catch (error) {
-        console.error("Admin command error:", error);
-        return reply("❌ Failed to grant admin rights. Error: " + error.message);
+        console.error("Admin Command Error:", error);
+        return reply("❌ Error: Could not promote you to admin.");
     }
 });
