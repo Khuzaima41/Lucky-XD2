@@ -1,9 +1,6 @@
 const { sleep } = require('../lib/functions');
-const config = require('../settings')
-const { malvin, commands } = require('../malvin')
-
-
-// Malvin King
+const config = require('../settings');
+const { malvin, commands } = require('../malvin');
 
 malvin({
     pattern: "leave",
@@ -14,27 +11,25 @@ malvin({
     filename: __filename
 },
 async (conn, mek, m, {
-    from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply
+    from, quoted, body, isCmd, command, args, q, isGroup, reply
 }) => {
     try {
-
         if (!isGroup) {
-            return reply("This command can only be used in groups.");
+            return reply("❌ This command can only be used in groups.");
         }
-        
 
-        const botOwner = conn.user.id.split(":")[0]; 
-        if (senderNumber !== botOwner) {
-            return reply("Only the bot owner can use this command.");
+        const sender = m.sender.split("@")[0]; // clean sender number
+        const botOwner = "923044003007"; // your number without @s.whatsapp.net
+
+        if (sender !== botOwner) {
+            return reply("❌ Only the bot owner can use this command.");
         }
 
         reply("Leaving group...");
         await sleep(1500);
         await conn.groupLeave(from);
-        reply("Goodbye! 👋");
     } catch (e) {
         console.error(e);
         reply(`❌ Error: ${e}`);
     }
 });
-
