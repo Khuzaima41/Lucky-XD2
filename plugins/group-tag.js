@@ -91,25 +91,4 @@ async (conn, mek, m, {
           console.error("Media download/send error:", e);
           return reply("❌ Failed to process the media. Sending as text instead.");
         }
-      }
 
-      // Fallback for any other message type
-      return await conn.sendMessage(from, {
-        text: m.quoted.text || "📨 Message",
-        ...mentionAll
-      }, { quoted: mek });
-    }
-
-    // If direct message
-    if (q) {
-      await conn.sendMessage(from, {
-        text: q,
-        ...mentionAll
-      }, { quoted: mek });
-    }
-
-  } catch (e) {
-    console.error(e);
-    reply(`❌ *Error occurred!*\n\n${e.message}`);
-  }
-});
