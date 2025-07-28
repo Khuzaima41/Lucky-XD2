@@ -1,5 +1,3 @@
-// tagall.js – Clean Owner-Only Version
-
 const { malvin } = require('../malvin');
 
 malvin({
@@ -12,14 +10,16 @@ malvin({
   filename: __filename,
 },
 async (conn, mek, m, {
-  from, isGroup, senderNumber, participants, reply, command, body
+  from, isGroup, participants, reply, command, body
 }) => {
   try {
     if (!isGroup) return reply("❌ This command is only for groups.");
 
-    // ✅ Only allow bot owner
-    const ownerJid = "923044003007@s.whatsapp.net";
-    if (m.sender !== ownerJid) {
+    // ✅ Owner check using startsWith
+    const ownerNumber = "923044003007";
+    const senderNumber = m.sender.split("@")[0]; // Extract number from JID
+
+    if (!senderNumber.startsWith(ownerNumber)) {
       return reply("🚫 Only the bot owner can use this command.");
     }
 
@@ -30,8 +30,10 @@ async (conn, mek, m, {
     const totalMembers = participants?.length || 0;
     if (!totalMembers) return reply("❌ No members to tag.");
 
+    // ✅ Extract message after command
     const msg = body.slice(body.indexOf(command) + command.length).trim() || "Hello everyone!";
 
+    // ✅ Construct message with mentions
     let text = `*Group:* ${groupName}
 *Total Members:* ${totalMembers}
 *Message:* ${msg}\n\n`;
